@@ -1,0 +1,16 @@
+name: Sync Fork Nightly
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every night at midnight UTC
+  workflow_dispatch: # Adds a button so you can run it manually whenever you want
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - run: gh repo sync $REPOSITORY -b main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
