@@ -1,8 +1,8 @@
-name: Sync Fork Nightly
+name: Sync Fork Weekly
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs every night at midnight UTC
-  workflow_dispatch: # Adds a button so you can run it manually whenever you want
+    - cron: '0 0 * * 0' # Runs every Sunday night at midnight UTC (Best Practice)
+  workflow_dispatch: # Allows you to run it manually
 
 jobs:
   sync:
@@ -10,7 +10,19 @@ jobs:
     permissions:
       contents: write
     steps:
-      - run: gh repo sync $REPOSITORY -b main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Configure Git Identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Fetch and Merge Upstream
+        run: |
+          git remote add upstream https://github.com/KelvinTegelaar/CIPP-API.git || true
+          git fetch upstream
+          git merge upstream/master --no-edit
+          git push origin master
